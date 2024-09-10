@@ -2,7 +2,7 @@
 var rest = require('request');
 
 var initDB = {
-  adminUser: { email: 'admin@abc.com', password: 'changeme', admin: true, firstName: 'Admin', lastName: 'User' },
+  adminUser: { email: 'admin@abc.com', password: 'admin', admin: true, firstName: 'Admin', lastName: 'User' },
 
   initialize: function(cfg) {
     initDB.apiKey = cfg.mongo.apiKey;
@@ -46,7 +46,7 @@ var initDB = {
   
   addAdminUser: function(done) {
     console.log('*** Admin user properties:', initDB.adminUser);
-    console.log('Checking that admin user does not exist...');
+    console.log('Checking that admin user does not exist...', initDB);
     initDB.checkDocument(initDB.usersCollection, initDB.adminUser, function(err, data) {
       if ( !err && data.length === 0 ) {
         console.log('Creating new admin user...', err, data);
@@ -57,8 +57,8 @@ var initDB = {
           done(err, data);
         });
       } else {
-        if (data.message) {
-          console.log('Error: ' + data.message);
+        if (data) {
+          console.log('Error: ' + data);
         } else {
           console.log('User already created.');
         }

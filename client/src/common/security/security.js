@@ -13,8 +13,19 @@ angular.module('security.service', [
     $location.path(url);
   }
 
+  
+
   // Login form dialog stuff
   var loginDialog = null;
+  function onLoginDialogClose(success) {
+    loginDialog = null;
+    if ( success ) {
+      queue.retryAll();
+    } else {
+      queue.cancelAll();
+      redirect();
+    }
+  }
   function openLoginDialog() {
     if ( loginDialog ) {
       throw new Error('Trying to open a dialog that is already open!');
@@ -27,22 +38,6 @@ angular.module('security.service', [
       loginDialog.close(success);
     }
   }
-  function onLoginDialogClose(success) {
-    loginDialog = null;
-    if ( success ) {
-      queue.retryAll();
-    } else {
-      queue.cancelAll();
-      redirect();
-    }
-  }
-
-  // Register a handler for when an item is added to the retry queue
-  queue.onItemAddedCallbacks.push(function(retryItem) {
-    if ( queue.hasMore() ) {
-      service.showLogin();
-    }
-  });
 
   // The public API of the service
   var service = {
@@ -109,5 +104,14 @@ angular.module('security.service', [
     }
   };
 
+
+  // Register a handler for when an item is added to the retry queue
+  queue.onItemAddedCallbacks.push(function(retryItem) {
+    if ( queue.hasMore() ) {
+      service.showLogin();
+    }
+  });
+
+  
   return service;
 }]);

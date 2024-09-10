@@ -14,6 +14,18 @@ angular.module('directives.gravatar', [])
       forceDefault: '='
     },
     link: function(scope, element, attrs) {
+      function generateParams() {
+        var options = [];
+        scope.getParams = '';
+        angular.forEach(scope.options, function(value, key) {
+          if ( value ) {
+            options.push(key + '=' + encodeURIComponent(value));
+          }
+        });
+        if ( options.length > 0 ) {
+          scope.getParams = '?' + options.join('&');
+        }
+      }
       scope.options = {};
       scope.$watch('email', function(email) {
         if ( email ) {
@@ -32,23 +44,30 @@ angular.module('directives.gravatar', [])
         scope.options.d = defaultImage ? defaultImage : undefined;
         generateParams();
       });
-      function generateParams() {
-        var options = [];
-        scope.getParams = '';
-        angular.forEach(scope.options, function(value, key) {
-          if ( value ) {
-            options.push(key + '=' + encodeURIComponent(value));
-          }
-        });
-        if ( options.length > 0 ) {
-          scope.getParams = '?' + options.join('&');
-        }
-      }
     }
   };
 }])
 
 .factory('md5', function() {
+  function cmn(q, a, b, x, s, t) {
+    a = add32(add32(a, q), add32(x, t));
+    return add32((a << s) | (a >>> (32 - s)), b);
+  }
+  function ff(a, b, c, d, x, s, t) {
+    return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+  }
+
+  function gg(a, b, c, d, x, s, t) {
+    return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+  }
+
+  function hh(a, b, c, d, x, s, t) {
+    return cmn(b ^ c ^ d, a, b, x, s, t);
+  }
+
+  function ii(a, b, c, d, x, s, t) {
+    return cmn(c ^ (b | (~d)), a, b, x, s, t);
+  }
   function md5cycle(x, k) {
     var a = x[0],
       b = x[1],
@@ -130,26 +149,16 @@ angular.module('directives.gravatar', [])
 
   }
 
-  function cmn(q, a, b, x, s, t) {
-    a = add32(add32(a, q), add32(x, t));
-    return add32((a << s) | (a >>> (32 - s)), b);
+  function md5blk(s) { /* I figured global was faster.   */
+    var md5blks = [],
+      i; /* Andy King said do it this way. */
+    for (i = 0; i < 64; i += 4) {
+      md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+    }
+    return md5blks;
   }
 
-  function ff(a, b, c, d, x, s, t) {
-    return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-  }
-
-  function gg(a, b, c, d, x, s, t) {
-    return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-  }
-
-  function hh(a, b, c, d, x, s, t) {
-    return cmn(b ^ c ^ d, a, b, x, s, t);
-  }
-
-  function ii(a, b, c, d, x, s, t) {
-    return cmn(c ^ (b | (~d)), a, b, x, s, t);
-  }
+  
 
   function md51(s) {
     txt = '';
@@ -192,14 +201,7 @@ angular.module('directives.gravatar', [])
    * 8-bit unsigned value arrays.
    */
 
-  function md5blk(s) { /* I figured global was faster.   */
-    var md5blks = [],
-      i; /* Andy King said do it this way. */
-    for (i = 0; i < 64; i += 4) {
-      md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
-    }
-    return md5blks;
-  }
+  
 
   var hex_chr = '0123456789abcdef'.split('');
 

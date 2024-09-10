@@ -2,7 +2,7 @@ var rewire = require('rewire');
 var security = rewire('../lib/security');
 
 var config = {
-  dbUrl: 'https://api.mongolab.com/api/1/databases',
+  dbUrl: 'mongodb://cellbio:cellbio0707!@211.45.167.54:28018/',
   apiKey: '4fb51e55e4b02e56a67b0b66',
   dbName: 'ascrum',
   usersCollection: 'users'
@@ -54,13 +54,13 @@ module.exports = {
   },
 
   authenticationRequired: function(test) {
+    var nextCalled = false;
+    var jsonCalled = false;
     // Setup mocks
     var req = {};
     var res = {
       json: function() { jsonCalled = true; }
     };
-    var nextCalled = false;
-    var jsonCalled = false;
     var next = function() { nextCalled = true; };
 
     // Test when user is unauthenticated
